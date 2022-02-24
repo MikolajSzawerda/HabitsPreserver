@@ -1,0 +1,105 @@
+[
+{
+    "model": "habits_managerAPI.habit",
+    "pk": 1,
+    "fields": {
+        "name": "Czysty kod",
+        "description": "Przeczytać całą książkę i coś z niej wynieść"
+    }
+},
+{
+    "model": "habits_managerAPI.habit",
+    "pk": 2,
+    "fields": {
+        "name": "Algorytmika",
+        "description": "Rozwiązywanie zadań algorytmicznych"
+    }
+},
+{
+    "model": "habits_managerAPI.fulfillmentlevel",
+    "pk": 1,
+    "fields": {
+        "name": "Mały wkład pracy",
+        "description": "Zrobiłeś drobną rzecz by podtrzymać ciągłość nawyku",
+        "value": 1
+    }
+},
+{
+    "model": "habits_managerAPI.fulfillmentlevel",
+    "pk": 2,
+    "fields": {
+        "name": "Średni wkład pracy",
+        "description": "Poświęciłeś trochę czasu na dany nawyk",
+        "value": 2
+    }
+},
+{
+    "model": "habits_managerAPI.fulfillmentlevel",
+    "pk": 3,
+    "fields": {
+        "name": "Duży wkład pracy",
+        "description": "Poświęciłeś sporo czasu na daną czynność",
+        "value": 3
+    }
+},
+{
+    "model": "habits_managerAPI.habitfulfillment",
+    "pk": 1,
+    "fields": {
+        "name": "< 1 rozdział",
+        "habit": 1,
+        "fulfillment_level": 1,
+        "description": null
+    }
+},
+{
+    "model": "habits_managerAPI.habitfulfillment",
+    "pk": 2,
+    "fields": {
+        "name": "1 rozdział",
+        "habit": 1,
+        "fulfillment_level": 2,
+        "description": null
+    }
+},
+{
+    "model": "habits_managerAPI.habitfulfillment",
+    "pk": 3,
+    "fields": {
+        "name": "> 1 rozdział",
+        "habit": 1,
+        "fulfillment_level": 3,
+        "description": null
+    }
+},
+{
+    "model": "habits_managerAPI.habitfulfillment",
+    "pk": 4,
+    "fields": {
+        "name": "Poczytanie na dany temat",
+        "habit": 2,
+        "fulfillment_level": 1,
+        "description": null
+    }
+},
+{
+    "model": "habits_managerAPI.habitfulfillment",
+    "pk": 5,
+    "fields": {
+        "name": "1 średnie zadanie algorytmiczne",
+        "habit": 2,
+        "fulfillment_level": 2,
+        "description": null
+    }
+},
+{
+    "model": "habits_managerAPI.habitfulfillment",
+    "pk": 6,
+    "fields": {
+        "name": "1 trudne, wiele zadań algorytmicznych",
+        "habit": 2,
+        "fulfillment_level": 3,
+        "description": null
+    }
+}
+]
