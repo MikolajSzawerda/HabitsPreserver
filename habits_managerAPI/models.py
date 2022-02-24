@@ -24,6 +24,6 @@ class FulfillmentLevel(ActivityItem):
 
 
 class HabitFulfillment(ActivityItem):
-    habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
+    habit = models.ForeignKey(Habit, on_delete=models.CASCADE, related_name='fulfillemnts')
     fulfillment_level = models.ForeignKey(FulfillmentLevel, on_delete=models.CASCADE)
     description = models.CharField(max_length=1000, null=True, blank=True)

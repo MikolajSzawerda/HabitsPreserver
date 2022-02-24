@@ -1,6 +1,6 @@
-import rest_framework.serializers
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from .models import FulfillmentLevel
+from .models import FulfillmentLevel, Habit, HabitFulfillment
 
 
 class FulfillmentLevelSerializer(ModelSerializer):
@@ -8,3 +8,22 @@ class FulfillmentLevelSerializer(ModelSerializer):
         model = FulfillmentLevel
         fields = '__all__'
 
+
+class FulfillmentSerializer(ModelSerializer):
+    class Meta:
+        model = HabitFulfillment
+        fields = ['id', 'name', 'fulfillment_level']
+
+
+class HabitSerializer(ModelSerializer):
+    fulfillemnts = FulfillmentSerializer(many=True)
+    class Meta:
+        model = Habit
+        fields = ['id', 'name', 'description', 'fulfillemnts']
+
+    def create(self, validated_data):
+        fulfillemnts_data = validated_data.pop('fulfillemnts')
+        habit = Habit.objects.create(**validated_data)
+        for fulfillemnt in fulfillemnts_data:
+            HabitFulfillment.objects.create(habit=habit, **fulfillemnt)
+        return habit
