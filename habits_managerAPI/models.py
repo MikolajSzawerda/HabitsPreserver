@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from numpy import require
 
 
 class ActivityItem(models.Model):
@@ -25,3 +26,4 @@ class FulfillmentLevel(ActivityItem):
 class HabitFulfillment(ActivityItem):
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
     fulfillment_level = models.ForeignKey(FulfillmentLevel, on_delete=models.CASCADE)
+    description = models.CharField(max_length=1000, null=True, blank=True)
