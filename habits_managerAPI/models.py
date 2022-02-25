@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from numpy import require
-
+from django.contrib.auth.models import User
 
 class ActivityItem(models.Model):
     name = models.CharField(max_length=200)
@@ -16,7 +15,7 @@ class ActivityItem(models.Model):
 
 
 class Habit(ActivityItem):
-   pass
+   user = models.ForeignKey(User, on_delete= models.CASCADE, blank=True, null=True)
 
 
 class FulfillmentLevel(ActivityItem):

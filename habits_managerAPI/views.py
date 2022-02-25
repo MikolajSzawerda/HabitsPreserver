@@ -21,5 +21,7 @@ class FulfillmentLevels(ListAPIView):
 
 
 class Habits(ModelViewSet):
-    queryset = Habit.objects.all()
     serializer_class = HabitSerializer
+    def get_queryset(self):
+        user = self.request.user
+        return Habit.objects.filter(user=user)
