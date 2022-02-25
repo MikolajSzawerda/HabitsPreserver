@@ -101,3 +101,29 @@ class HabitTestsDislogged(APITestCase):
         habit = self.json_habit
         response = self.client.post(url, habit, format="json")
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+class HabitTestsAdmin(APITestCase):
+    fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
+
+    def setUp(self) -> None:
+        username = "admin"
+        password = "admin"
+        self.user = User.objects.get(username=username)
+        self.client.login(username=username, password=password)
+        self.json_habit = json_habit_obj()
+
+    @pytest.mark.django_db
+    def test_getting_habits(self):
+        habits_num = len(Habit.objects.all())
+        url = reverse('habits')
+        response = self.client.get(url, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == habits_num
+
+    @pytest.mark.django_db
+    def test_retreving_habit(self):
+        url = reverse('habit', kwargs={'pk': 1})
+        response = self.client.get(url, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['name'] == 'Czysty kod'

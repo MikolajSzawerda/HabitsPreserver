@@ -28,6 +28,8 @@ class Habits(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if user.is_superuser:
+            return Habit.objects.all()
         return Habit.objects.filter(user=user)
 
     def retrieve(self, request, *args, **kwargs):
