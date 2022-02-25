@@ -1,7 +1,6 @@
-from os import name
 from django.urls import reverse
-from habits_managerAPI.models import HabitFulfillment, Habit, FulfillmentLevel
-from habits_managerAPI.serializers import HabitSerializer, FulfillmentSerializer, FulfillmentLevelSerializer
+from habits_managerAPI.models import HabitFulfillment, Habit
+from habits_managerAPI.serializers import HabitSerializer
 from rest_framework.test import APITestCase
 from rest_framework import status
 import pytest
@@ -26,7 +25,6 @@ class HabitTests(APITestCase):
     @pytest.mark.django_db
     def test_creating_habit(self):
         url = reverse('habits')
-        level = FulfillmentLevel.objects.get(pk=1)
         fulfillments = HabitFulfillment.objects.filter(pk__in=[1,2,3])
 
         habit = Habit.objects.create(name="Test", description="test test")
