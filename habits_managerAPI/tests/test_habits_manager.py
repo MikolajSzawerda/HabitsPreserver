@@ -33,7 +33,7 @@ def json_habit_obj():
     return obj.data
 
 
-class HabitTests(APITestCase):
+class HabitTestsLogged(APITestCase):
     fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
 
     def setUp(self) -> None:
@@ -44,19 +44,12 @@ class HabitTests(APITestCase):
         self.json_habit = json_habit_obj()
 
     @pytest.mark.django_db
-    def test_getting_habits_logged(self):
+    def test_getting_habits(self):
         habits_num = len(Habit.objects.filter(user=self.user))
         url = reverse('habits')
         response = self.client.get(url, format="json")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == habits_num
-
-    @pytest.mark.django_db
-    def test_getting_habits_not_logged(self):
-        self.client.logout()
-        url = reverse('habits')
-        response = self.client.get(url, format="json")
-        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.django_db
     def test_retreving_habit(self):
@@ -72,13 +65,6 @@ class HabitTests(APITestCase):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.django_db
-    def test_retreving_habit_not_logged(self):
-        self.client.logout()
-        url = reverse('habit', kwargs={'pk': 1})
-        response = self.client.get(url, format="json")
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-
-    @pytest.mark.django_db
     def test_creating_habit(self):
         url = reverse('habits')
         habits_num = len(Habit.objects.all())
@@ -90,9 +76,27 @@ class HabitTests(APITestCase):
         assert len(created_habit.fulfillemnts.all()) == len(habit['fulfillemnts'])
         assert created_habit.description == habit['description']
 
+
+class HabitTestsDislogged(APITestCase):
+    fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
+
+    def setUp(self) -> None:
+        self.json_habit = json_habit_obj()
+
     @pytest.mark.django_db
-    def test_creating_habit_not_logged(self):
-        self.client.logout()
+    def test_getting_habits(self):
+        url = reverse('habits')
+        response = self.client.get(url, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.django_db
+    def test_retreving_habit(self):
+        url = reverse('habit', kwargs={'pk': 1})
+        response = self.client.get(url, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.django_db
+    def test_creating_habit(self):
         url = reverse('habits')
         habit = self.json_habit
         response = self.client.post(url, habit, format="json")
