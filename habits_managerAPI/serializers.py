@@ -22,9 +22,9 @@ class HabitSerializer(ModelSerializer):
         fields = ['id', 'name', 'description', 'fulfillemnts']
 
     def create(self, validated_data):
-        fulfillemnts_data = validated_data.pop('fulfillemnts')
-        habit = Habit.objects.create(**validated_data)
         user=self.context['request'].user
+        fulfillemnts_data = validated_data.pop('fulfillemnts')
+        habit = Habit.objects.create(user=user, **validated_data)
         for fulfillemnt in fulfillemnts_data:
-            HabitFulfillment.objects.create(habit=habit, user=user, **fulfillemnt)
+            HabitFulfillment.objects.create(habit=habit, **fulfillemnt)
         return habit

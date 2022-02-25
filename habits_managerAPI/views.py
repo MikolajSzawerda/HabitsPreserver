@@ -4,6 +4,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from .models import FulfillmentLevel, Habit
 from .serializers import FulfillmentLevelSerializer, HabitSerializer
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsHabitCreator
 
 
 class Index(APIView):
@@ -22,6 +24,13 @@ class FulfillmentLevels(ListAPIView):
 
 class Habits(ModelViewSet):
     serializer_class = HabitSerializer
+    permission_classes = [IsAuthenticated, IsHabitCreator]
+
     def get_queryset(self):
         user = self.request.user
         return Habit.objects.filter(user=user)
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = Habit.objects.get(pk=kwargs['pk'])
+        self.check_object_permissions(request, obj)
+        return Response(HabitSerializer(obj).data)
