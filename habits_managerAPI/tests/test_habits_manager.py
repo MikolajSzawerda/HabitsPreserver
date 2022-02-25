@@ -52,6 +52,13 @@ class HabitTestsLogged(APITestCase):
         assert len(response.data) == habits_num
 
     @pytest.mark.django_db
+    def test_habit_content(self):
+        url = reverse('habits')
+        response = self.client.get(url, format="json")
+        with pytest.raises(KeyError):
+            habit = response.data[0]['user']
+
+    @pytest.mark.django_db
     def test_retreving_habit(self):
         url = reverse('habit', kwargs={'pk': 1})
         response = self.client.get(url, format="json")
@@ -120,6 +127,12 @@ class HabitTestsAdmin(APITestCase):
         response = self.client.get(url, format="json")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == habits_num
+
+    @pytest.mark.django_db
+    def test_habits_content(self):
+        url = reverse('habits')
+        response = self.client.get(url, format="json")
+        assert all('user' in x.keys() for x in response.data)
 
     @pytest.mark.django_db
     def test_retreving_habit(self):

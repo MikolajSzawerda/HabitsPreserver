@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from .models import FulfillmentLevel, Habit
-from .serializers import FulfillmentLevelSerializer, HabitSerializer
+from .serializers import FulfillmentLevelSerializer, HabitSerializer, SUDOHabitSerializer
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsHabitCreator
 
@@ -23,8 +23,14 @@ class FulfillmentLevels(ListAPIView):
 
 
 class Habits(ModelViewSet):
-    serializer_class = HabitSerializer
+    # serializer_class = HabitSerializer
     permission_classes = [IsAuthenticated, IsHabitCreator]
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_superuser:
+            return SUDOHabitSerializer
+        return HabitSerializer
 
     def get_queryset(self):
         user = self.request.user

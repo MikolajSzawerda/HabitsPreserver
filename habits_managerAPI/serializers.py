@@ -28,3 +28,18 @@ class HabitSerializer(ModelSerializer):
         for fulfillemnt in fulfillemnts_data:
             HabitFulfillment.objects.create(habit=habit, **fulfillemnt)
         return habit
+
+
+class SUDOHabitSerializer(ModelSerializer):
+    fulfillemnts = FulfillmentSerializer(many=True)
+    class Meta:
+        model = Habit
+        fields = ['id', 'name', 'user', 'description', 'fulfillemnts']
+
+    def create(self, validated_data):
+        user=self.context['request'].user
+        fulfillemnts_data = validated_data.pop('fulfillemnts')
+        habit = Habit.objects.create(user=user, **validated_data)
+        for fulfillemnt in fulfillemnts_data:
+            HabitFulfillment.objects.create(habit=habit, **fulfillemnt)
+        return habit
