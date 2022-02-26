@@ -28,6 +28,17 @@ class HabitSerializer(ModelSerializer):
             HabitFulfillment.objects.create(habit=habit, **fulfillemnt)
         return habit
 
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        up_fulfillemnts = validated_data.get('fulfillemnts', instance.fulfillemnts)
+        for ful in instance.fulfillemnts.all():
+            ful.delete()
+        for fulfillement in up_fulfillemnts:
+            HabitFulfillment.objects.create(habit=instance, **fulfillement)
+        instance.save()
+        return instance
+
 
 class SUDOHabitSerializer(HabitSerializer):
     class Meta:

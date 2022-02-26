@@ -1,3 +1,5 @@
+from os import stat
+from django.http import response
 from django.urls import reverse
 from habits_managerAPI.models import HabitFulfillment, Habit
 from habits_managerAPI.serializers import HabitSerializer, FulfillmentSerializer
@@ -83,6 +85,38 @@ class HabitTestsLogged(APITestCase):
         assert len(created_habit.fulfillemnts.all()) == len(habit['fulfillemnts'])
         assert created_habit.description == habit['description']
 
+    @pytest.mark.django_db
+    def test_updating_habit(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit = Habit.objects.get(pk=1)
+        habit_serialized = HabitSerializer(habit).data
+        habit_serialized['name']='Test test'
+        response = self.client.put(url, habit_serialized, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        habit = Habit.objects.get(pk=1)
+        assert habit.name == 'Test test'
+
+    @pytest.mark.django_db
+    def test_updating_habit_fulfillemnt(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit = Habit.objects.get(pk=1)
+        habit_serialized = HabitSerializer(habit).data
+        habit_serialized['fulfillemnts'][0]['name']='test34'
+        habit_serialized['fulfillemnts'].pop(1)
+        response = self.client.put(url, habit_serialized, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        habit = Habit.objects.get(pk=1)
+        assert len(habit.fulfillemnts.all()) == 2
+        assert habit.fulfillemnts.get(name='test34') is not None
+
+    @pytest.mark.django_db
+    def test_deleting_habit(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit_num = len(Habit.objects.all())
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert len(Habit.objects.all()) == habit_num - 1
+
 
 class HabitTestsDislogged(APITestCase):
     fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
@@ -108,6 +142,14 @@ class HabitTestsDislogged(APITestCase):
         habit = self.json_habit
         response = self.client.post(url, habit, format="json")
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.django_db
+    def test_deleting_habit(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit_num = len(Habit.objects.all())
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert len(Habit.objects.all()) == habit_num
 
 
 class HabitTestsAdmin(APITestCase):
@@ -140,3 +182,37 @@ class HabitTestsAdmin(APITestCase):
         response = self.client.get(url, format="json")
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == 'Czysty kod'
+
+    @pytest.mark.django_db
+    def test_updating_habit(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit = Habit.objects.get(pk=1)
+        user = habit.user
+        habit_serialized = HabitSerializer(habit).data
+        habit_serialized['name']='Test test'
+        response = self.client.put(url, habit_serialized, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        habit = Habit.objects.get(pk=1)
+        assert habit.user.username == user.username
+        assert habit.name == 'Test test'
+
+    @pytest.mark.django_db
+    def test_updating_habit_fulfillemnt(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit = Habit.objects.get(pk=1)
+        habit_serialized = HabitSerializer(habit).data
+        habit_serialized['fulfillemnts'][0]['name']='test34'
+        habit_serialized['fulfillemnts'].pop(1)
+        response = self.client.put(url, habit_serialized, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        habit = Habit.objects.get(pk=1)
+        assert len(habit.fulfillemnts.all()) == 2
+        assert habit.fulfillemnts.get(name='test34') is not None
+
+    @pytest.mark.django_db
+    def test_deleting_habit(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit_num = len(Habit.objects.all())
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert len(Habit.objects.all()) == habit_num - 1
