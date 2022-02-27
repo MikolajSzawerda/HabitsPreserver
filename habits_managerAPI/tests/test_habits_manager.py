@@ -110,6 +110,20 @@ class HabitTestsLogged(APITestCase):
         assert habit.fulfillemnts.get(name='test34') is not None
 
     @pytest.mark.django_db
+    def test_updating_habit_fulfillemnt_id_preserve(self):
+        url = reverse('habit', kwargs={'pk':1})
+        habit = Habit.objects.get(pk=1)
+        fulfillment_id = habit.fulfillemnts.first()
+        habit_serialized = HabitSerializer(habit).data
+        habit_serialized['fulfillemnts'].pop(1)
+        response = self.client.put(url, habit_serialized, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        habit = Habit.objects.get(pk=1)
+        updated_fulfillment_id = habit.fulfillemnts.first()
+        assert fulfillment_id == updated_fulfillment_id
+
+
+    @pytest.mark.django_db
     def test_deleting_habit(self):
         url = reverse('habit', kwargs={'pk':1})
         habit_num = len(Habit.objects.all())
