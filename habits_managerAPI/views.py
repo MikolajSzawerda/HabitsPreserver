@@ -73,3 +73,9 @@ class HabitActions(ModelViewSet):
         fulfil = HabitFulfillment.objects.get(pk=pk)
         self.check_object_permissions(request, fulfil)
         return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        pk = request.data['fulfillment']
+        fulfil = HabitFulfillment.objects.get(pk=pk)
+        self.check_object_permissions(request, fulfil)
+        return super().update(request, *args, **kwargs)

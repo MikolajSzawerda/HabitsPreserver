@@ -8,7 +8,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 import pytest
 from django.db.models import Prefetch, FilteredRelation, Q
-
+from django.core.exceptions import ObjectDoesNotExist
 
 def json_action_obj():
     obj = HabitActionSerializer(data={
@@ -82,6 +82,36 @@ class HabitTestsLogged(APITestCase):
         assert len(HabitAction.objects.all()) == actions_num +1
 
     @pytest.mark.django_db
+    def test_updating_action(self):
+        url = reverse('action', kwargs={'pk':1})
+        action_data = self.client.get(url)
+        action_data.data['fulfillment'] = 4
+        response = self.client.put(url, action_data.data)
+        assert response.status_code == status.HTTP_200_OK
+        action = HabitAction.objects.get(pk=1)
+        assert action.fulfillment.id == 4
+
+    @pytest.mark.django_db
+    def test_updating_action_forbidden(self):
+        action = HabitAction.objects.get(pk=1)
+        url = reverse('action', kwargs={'pk':1})
+        action_data = self.client.get(url)
+        action_data.data['fulfillment'] = 9
+        response = self.client.put(url, action_data.data)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        up_action = HabitAction.objects.get(pk=1)
+        assert action.fulfillment.id == up_action.fulfillment.id
+
+    @pytest.mark.django_db
+    def test_deleting_action(self):
+        url = reverse('action', kwargs={'pk':1})
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        with pytest.raises(ObjectDoesNotExist):
+            action = HabitAction.objects.get(pk=1)
+
+
+    @pytest.mark.django_db
     def test_retriving_forbidden_action(self):
         url = reverse('action', kwargs={'pk':7})
         response = self.client.get(url)
@@ -92,6 +122,31 @@ class HabitTestsDislogged(APITestCase):
 
     def setUp(self) -> None:
         self.json_action = json_action_obj()
+
+    @pytest.mark.django_db
+    def test_retriving_actions(self):
+        url = reverse('actions')
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.django_db
+    def test_retriving_action(self):
+        url = reverse('action', kwargs={'pk':1})
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.django_db
+    def test_creating_action(self):
+        url = reverse('actions')
+        data = self.json_action
+        response = self.client.post(url, data)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.django_db
+    def test_deleting_action(self):
+        url = reverse('action', kwargs={'pk':1})
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 class HabitTestsAdmin(APITestCase):
@@ -111,4 +166,31 @@ class HabitTestsAdmin(APITestCase):
         actions = HabitAction.objects.all()
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == len(actions)
+
+    @pytest.mark.django_db
+    def test_creating_action(self):
+        actions_num = len(HabitAction.objects.all())
+        url = reverse('actions')
+        data = self.json_action
+        response = self.client.post(url, data)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert len(HabitAction.objects.all()) == actions_num +1
+
+    @pytest.mark.django_db
+    def test_updating_action(self):
+        url = reverse('action', kwargs={'pk':1})
+        action_data = self.client.get(url)
+        action_data.data['fulfillment'] = 4
+        response = self.client.put(url, action_data.data)
+        assert response.status_code == status.HTTP_200_OK
+        action = HabitAction.objects.get(pk=1)
+        assert action.fulfillment.id == 4
+
+    @pytest.mark.django_db
+    def test_deleting_action(self):
+        url = reverse('action', kwargs={'pk':1})
+        response = self.client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        with pytest.raises(ObjectDoesNotExist):
+            action = HabitAction.objects.get(pk=1)
 

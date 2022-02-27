@@ -67,3 +67,9 @@ class HabitActionSerializer(ModelSerializer):
     class Meta:
         model = HabitAction
         fields = '__all__'
+
+    def update(self, instance, validated_data):
+        instance.fulfillment = validated_data.get('fulfillment', instance.fulfillment)
+        instance.date = validated_data.get('date', instance.date)
+        instance.save()
+        return instance
