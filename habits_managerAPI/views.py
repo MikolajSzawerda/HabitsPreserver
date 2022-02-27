@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from .models import FulfillmentLevel, Habit, HabitAction, HabitFulfillment
 from .serializers import FulfillmentLevelSerializer, HabitSerializer, SUDOHabitSerializer, HabitActionSerializer
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsHabitCreator, IsFulfillemntOwner
+from .permissions import IsHabitCreator, IsHabitActionOwner
 from django.db.models import Prefetch
 
 
@@ -47,7 +47,7 @@ class Habits(ModelViewSet):
 
 class HabitActions(ModelViewSet):
     serializer_class = HabitActionSerializer
-    permission_classes = [IsAuthenticated, IsFulfillemntOwner]
+    permission_classes = [IsAuthenticated, IsHabitActionOwner]
 
     def get_queryset(self):
         user = self.request.user
@@ -65,7 +65,7 @@ class HabitActions(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         obj = HabitAction.objects.get(pk=kwargs['pk'])
-        self.check_object_permissions(request, obj.fulfillment)
+        self.check_object_permissions(request, obj)
         return Response(HabitActionSerializer(obj).data)
 
     def create(self, request, *args, **kwargs):

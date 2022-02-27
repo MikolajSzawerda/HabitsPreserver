@@ -8,10 +8,14 @@ class IsHabitCreator(BasePermission):
         return obj.user == request.user
 
 
-class IsFulfillemntOwner(BasePermission):
+class IsHabitActionOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-        owner = obj.habit.user
+        try:
+            owner = obj.fulfillment.habit.user
+        except AttributeError:
+            owner = obj.habit.user
         user = request.user
         return owner == user
+
