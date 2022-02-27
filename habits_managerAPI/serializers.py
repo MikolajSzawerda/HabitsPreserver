@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer, IntegerField
-from .models import FulfillmentLevel, Habit, HabitFulfillment
+from .models import FulfillmentLevel, Habit, HabitFulfillment, HabitAction
 from .utils import get_pks_to_delete
 
 class FulfillmentLevelSerializer(ModelSerializer):
@@ -62,3 +62,8 @@ class SUDOHabitSerializer(HabitSerializer):
     def create(self, validated_data):
         pass
 
+
+class HabitActionSerializer(ModelSerializer):
+    class Meta:
+        model = HabitAction
+        fields = '__all__'

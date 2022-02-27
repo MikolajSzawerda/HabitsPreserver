@@ -2,10 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from .models import FulfillmentLevel, Habit
-from .serializers import FulfillmentLevelSerializer, HabitSerializer, SUDOHabitSerializer
+from .models import FulfillmentLevel, Habit, HabitAction, HabitFulfillment
+from .serializers import FulfillmentLevelSerializer, HabitSerializer, SUDOHabitSerializer, HabitActionSerializer
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsHabitCreator
+from .permissions import IsHabitCreator, IsFulfillemntOwner
+from django.db.models import Prefetch
 
 
 class Index(APIView):
@@ -42,3 +43,33 @@ class Habits(ModelViewSet):
         obj = Habit.objects.get(pk=kwargs['pk'])
         self.check_object_permissions(request, obj)
         return Response(HabitSerializer(obj).data)
+
+
+class HabitActions(ModelViewSet):
+    serializer_class = HabitActionSerializer
+    permission_classes = [IsAuthenticated, IsFulfillemntOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return HabitAction.objects.all()
+        return HabitAction.objects.filter(
+            fulfillment__habit__user = user
+        ).prefetch_related(
+            Prefetch('fulfillment', queryset=HabitFulfillment.objects.filter(
+                habit__user=user
+            ).prefetch_related(
+                Prefetch('habit', queryset=Habit.objects.filter(user=user)
+                )))
+        )
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = HabitAction.objects.get(pk=kwargs['pk'])
+        self.check_object_permissions(request, obj.fulfillment)
+        return Response(HabitActionSerializer(obj).data)
+
+    def create(self, request, *args, **kwargs):
+        pk = request.data['fulfillment']
+        fulfil = HabitFulfillment.objects.get(pk=pk)
+        self.check_object_permissions(request, fulfil)
+        return super().create(request, *args, **kwargs)

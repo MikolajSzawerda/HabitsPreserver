@@ -26,3 +26,8 @@ class HabitFulfillment(ActivityItem):
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE, related_name='fulfillemnts')
     fulfillment_level = models.ForeignKey(FulfillmentLevel, on_delete=models.CASCADE)
     description = models.CharField(max_length=1000, null=True, blank=True)
+
+
+class HabitAction(models.Model):
+    fulfillment = models.ForeignKey(HabitFulfillment, on_delete=models.CASCADE)
+    date = models.DateField()

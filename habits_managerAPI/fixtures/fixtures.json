@@ -1034,5 +1034,61 @@
         "fulfillment_level": 3,
         "description": null
     }
+},
+{
+    "model": "habits_managerAPI.habitaction",
+    "pk": 1,
+    "fields": {
+        "fulfillment": 6,
+        "date": "2022-02-27"
+    }
+},
+{
+    "model": "habits_managerAPI.habitaction",
+    "pk": 2,
+    "fields": {
+        "fulfillment": 4,
+        "date": "2022-02-14"
+    }
+},
+{
+    "model": "habits_managerAPI.habitaction",
+    "pk": 3,
+    "fields": {
+        "fulfillment": 5,
+        "date": "2022-02-26"
+    }
+},
+{
+    "model": "habits_managerAPI.habitaction",
+    "pk": 4,
+    "fields": {
+        "fulfillment": 5,
+        "date": "2022-02-25"
+    }
+},
+{
+    "model": "habits_managerAPI.habitaction",
+    "pk": 5,
+    "fields": {
+        "fulfillment": 6,
+        "date": "2022-02-24"
+    }
+},
+{
+    "model": "habits_managerAPI.habitaction",
+    "pk": 6,
+    "fields": {
+        "fulfillment": 9,
+        "date": "2022-02-23"
+    }
+},
+{
+    "model": "habits_managerAPI.habitaction",
+    "pk": 7,
+    "fields": {
+        "fulfillment": 9,
+        "date": "2022-02-24"
+    }
 }
 ]
