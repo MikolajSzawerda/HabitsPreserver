@@ -35,6 +35,12 @@ def json_habit_obj():
     return obj.data
 
 
+def urls():
+    return {
+        'habits': reverse('habits'),
+    }
+
+
 class HabitTestsLogged(APITestCase):
     fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
 
@@ -44,6 +50,7 @@ class HabitTestsLogged(APITestCase):
         self.user = User.objects.get(username=username)
         self.client.login(username=username, password=password)
         self.json_habit = json_habit_obj()
+        self.urls = urls()
 
     @pytest.mark.django_db
     def test_getting_habits(self):
