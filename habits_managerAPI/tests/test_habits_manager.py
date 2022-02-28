@@ -1,5 +1,4 @@
 from os import stat
-from django.http import response
 from django.urls import reverse
 from habits_managerAPI.models import HabitFulfillment, Habit
 from habits_managerAPI.serializers import HabitSerializer, FulfillmentSerializer
@@ -70,18 +69,44 @@ def urls():
     }
 
 
-class HabitTestsLogged(APITestCase):
+class CRUDOperations:
+    '''
+    Defintion of CRUD operation on Habit object
+    '''
+    def __init__(self, testObj):
+        self.testingUnit = testObj
+
+    def read(self, url):
+        return self.testingUnit.client.get(url, format="json")
+
+
+class BaseTestUnit(APITestCase):
+    '''
+    Class defining data used in across all testing unit(admin, user, anon)
+    '''
     fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
+
+    def setUp(self, testingUnit, user_data=None) -> None:
+        self.json_habit = json_habit_obj()
+        self.urls = urls()
+        self.crud = CRUDOperations(testingUnit)
+        if user_data:
+            username = user_data.get('username', None)
+            password = user_data.get('password', None)
+            self.user = User.objects.get(username=username)
+            self.client.login(username=username, password=password)
+
+
+class HabitTestsLogged(BaseTestUnit):
     '''
     Login to db as normal user
     '''
     def setUp(self) -> None:
-        username = "Polskipolak"
-        password = "chustka1234"
-        self.user = User.objects.get(username=username)
-        self.client.login(username=username, password=password)
-        self.json_habit = json_habit_obj()
-        self.urls = urls()
+        user_data = {
+            'username': "Polskipolak",
+            'password': "chustka1234"
+        }
+        super().setUp(self, user_data)
 
     '''
     Retrieve from db all habits available to the user
@@ -89,15 +114,17 @@ class HabitTestsLogged(APITestCase):
     @pytest.mark.django_db
     def test_retrieving_habits(self):
         user_habits_number = len(Habit.objects.filter(user=self.user))
-        response = self.client.get(self.urls['habits'], format="json")
+        response = self.crud.read(self.urls['habits'])
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == user_habits_number
-
+    '''
+    User cannot see what is his id
+    '''
     @pytest.mark.django_db
     def test_not_getting_user_id_in_habit_view(self):
-        response = self.client.get(self.urls['habits'], format="json")
+        response = self.crud.read(self.urls['habits'])
         with pytest.raises(KeyError):
-            habit = response.data[0]['user']
+            response.data[0]['user']
 
     '''
     Retrieve from db single habit obj, checking if it is available to the user
@@ -105,14 +132,14 @@ class HabitTestsLogged(APITestCase):
     @pytest.mark.django_db
     def test_retrieving_habit(self):
         url = reverse('habit', kwargs={'pk': 1})
-        response = self.client.get(url, format="json")
+        response = self.crud.read(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == 'Czysty kod'
 
     @pytest.mark.django_db
     def test_retrieving_forbidden_habit_to_user(self):
         url = reverse('habit', kwargs={'pk': 3})
-        response = self.client.get(url, format="json")
+        response = self.crud.read(url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.django_db
@@ -188,22 +215,22 @@ class HabitTestsLogged(APITestCase):
         assert len(Habit.objects.all()) == habit_num - 1
 
 
-class HabitTestsDislogged(APITestCase):
-    fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
-
+class HabitTestsDislogged(BaseTestUnit):
+    '''
+    Trying to access db as anon
+    '''
     def setUp(self) -> None:
-        self.json_habit = json_habit_obj()
+        super().setUp(self)
 
     @pytest.mark.django_db
-    def test_getting_habits(self):
-        url = reverse('habits')
-        response = self.client.get(url, format="json")
+    def test_retrieving_habits(self):
+        response = self.crud.read(self.urls['habits'])
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.django_db
-    def test_retreving_habit(self):
+    def test_retrieving_habit(self):
         url = reverse('habit', kwargs={'pk': 1})
-        response = self.client.get(url, format="json")
+        response = self.crud.read(url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.django_db
@@ -222,32 +249,35 @@ class HabitTestsDislogged(APITestCase):
         assert len(Habit.objects.all()) == habit_num
 
 
-class HabitTestsAdmin(APITestCase):
-    fixtures = ["habits_managerAPI/fixtures/fixtures.json"]
-
+class HabitTestsAdmin(BaseTestUnit):
+    '''
+    Accessing db as admin
+    '''
     def setUp(self) -> None:
-        username = "admin"
-        password = "admin"
-        self.user = User.objects.get(username=username)
-        self.client.login(username=username, password=password)
-        self.json_habit = json_habit_obj()
+        user_data = {
+        'username' : "admin",
+        'password' : "admin"
+        }
+        super().setUp(self, user_data)
 
+    '''
+    Retrieve from db all habits
+    '''
     @pytest.mark.django_db
-    def test_getting_habits(self):
-        habits_num = len(Habit.objects.all())
-        url = reverse('habits')
-        response = self.client.get(url, format="json")
+    def test_retrieving_habits(self):
+        habits_number = len(Habit.objects.all())
+        response = self.crud.read(self.urls['habits'])
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == habits_num
+        assert len(response.data) == habits_number
+
 
     @pytest.mark.django_db
-    def test_habits_content(self):
-        url = reverse('habits')
-        response = self.client.get(url, format="json")
+    def test_admin_can_see_habit_owner(self):
+        response = self.crud.read(self.urls['habits'])
         assert all('user' in x.keys() for x in response.data)
 
     @pytest.mark.django_db
-    def test_retreving_habit(self):
+    def test_retrieving_habit(self):
         url = reverse('habit', kwargs={'pk': 1})
         response = self.client.get(url, format="json")
         assert response.status_code == status.HTTP_200_OK

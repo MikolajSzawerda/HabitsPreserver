@@ -10,25 +10,25 @@ class FulfillmentLevelSerializer(ModelSerializer):
         fields = '__all__'
 
 
-class FulfillmentsListSerializer(ListSerializer):
+# class FulfillmentsListSerializer(ListSerializer):
 
-    def update(self, instance, validated_data):
-        fulfillments = instance.all()
-        fulfillments_mapping = {fulfill.id : fulfill for fulfill in fulfillments}
-        updated_data = []
-        ids = set()
-        for fulfill in validated_data:
-            if 'id' in fulfill.keys():
-                id = fulfill.get('id')
-                ids.add(id)
-                updated_obj = self.child.update(fulfillments_mapping[id], fulfill)
-                updated_data.append(updated_obj)
-            else:
-                updated_data.append(self.child.create(fulfill))
-        for id, fulfill in fulfillments_mapping.items():
-            if id not in ids:
-                fulfill.delete()
-        return updated_data
+#     def update(self, instance, validated_data):
+#         fulfillments = instance.all()
+#         fulfillments_mapping = {fulfill.id : fulfill for fulfill in fulfillments}
+#         updated_data = []
+#         ids = set()
+#         for fulfill in validated_data:
+#             if 'id' in fulfill.keys():
+#                 id = fulfill.get('id')
+#                 ids.add(id)
+#                 updated_obj = self.child.update(fulfillments_mapping[id], fulfill)
+#                 updated_data.append(updated_obj)
+#             else:
+#                 updated_data.append(self.child.create(fulfill))
+#         for id, fulfill in fulfillments_mapping.items():
+#             if id not in ids:
+#                 fulfill.delete()
+#         return updated_data
 
 
 class FulfillmentSerializer(ModelSerializer):
@@ -101,7 +101,7 @@ class HabitSerializer(ModelSerializer):
 class SUDOHabitSerializer(HabitSerializer):
     class Meta:
         model = Habit
-        fields = ['id', 'name', 'user', 'description', 'fulfillemnts']
+        fields = ['id', 'name', 'user', 'description', 'fulfillments']
 
     # def create(self, validated_data):
     #     pass

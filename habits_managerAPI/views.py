@@ -27,11 +27,11 @@ class Habits(ModelViewSet):
     serializer_class = HabitSerializer
     permission_classes = [IsAuthenticated, IsHabitCreator]
 
-    # def get_serializer_class(self):
-    #     user = self.request.user
-    #     if user.is_superuser:
-    #         return SUDOHabitSerializer
-    #     return HabitSerializer
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_superuser:
+            return SUDOHabitSerializer
+        return HabitSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -43,7 +43,7 @@ class Habits(ModelViewSet):
         pk = self.kwargs['pk']
         obj = Habit.objects.get(pk=pk)
         self.check_object_permissions(self.request, obj)
-        return Response(HabitSerializer(obj).data)
+        return obj
 
 
 class HabitActions(ModelViewSet):
