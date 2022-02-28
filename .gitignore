@@ -5,6 +5,7 @@ __pycache__/
 
 *.png
 
+
 # Unit test / coverage reports
 htmlcov/
 .tox/

@@ -10,6 +10,13 @@ import pytest
 from django.db.models import Prefetch, FilteredRelation, Q
 from django.core.exceptions import ObjectDoesNotExist
 
+'''
+Fulfillment Action:
+    Add new action, by choosing fulfillment from available habits
+    When edit, create just new object
+    Remove action
+'''
+
 def json_action_obj():
     obj = HabitActionSerializer(data={
         "date": "2022-01-27",
