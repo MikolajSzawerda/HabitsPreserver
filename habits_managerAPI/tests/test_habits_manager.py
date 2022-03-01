@@ -5,6 +5,7 @@ from habits_managerAPI.serializers import HabitSerializer, FulfillmentSerializer
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth.models import User
+from rest_framework.renderers import JSONRenderer
 import pytest
 
 '''
@@ -41,7 +42,7 @@ def json_habit_obj():
     obj = HabitSerializer(data={
         'name': 'Test',
         'description': 'test',
-        'fulfillemnts': [
+        'fulfillments': [
             {
                 'name': 'Test1',
                 'description': 'test1',
@@ -78,6 +79,10 @@ class CRUDOperations:
 
     def read(self, url):
         return self.testingUnit.client.get(url, format="json")
+
+    def create(self, url):
+        habit = self.testingUnit.json_habit
+        return (self.testingUnit.client.post(url, habit, format="json"), habit)
 
 
 class BaseTestUnit(APITestCase):
@@ -145,14 +150,11 @@ class HabitTestsLogged(BaseTestUnit):
     @pytest.mark.django_db
     def test_creating_habit(self):
         url = reverse('habits')
-        habits_num = len(Habit.objects.all())
-        habit = self.json_habit
-        response = self.client.post(url, habit, format="json")
+        response, habit = self.crud.create(url)
         assert response.status_code == status.HTTP_201_CREATED
+        habits_num = len(Habit.objects.all())
         assert len(Habit.objects.all()) == habits_num + 1
-        created_habit = Habit.objects.get(name="Test")
-        assert len(created_habit.fulfillemnts.all()) == len(habit['fulfillemnts'])
-        assert created_habit.description == habit['description']
+        assert len(response.data['fulfillments']) == len(habit['fulfillments'])
 
     @pytest.mark.django_db
     def test_updating_habit(self):

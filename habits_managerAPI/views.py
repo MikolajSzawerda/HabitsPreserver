@@ -24,8 +24,8 @@ class FulfillmentLevels(ListAPIView):
 
 
 class Habits(ModelViewSet):
-    serializer_class = HabitSerializer
-    permission_classes = [IsAuthenticated, IsHabitCreator]
+    # serializer_class = HabitSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         user = self.request.user
@@ -49,34 +49,3 @@ class Habits(ModelViewSet):
 class HabitActions(ModelViewSet):
     serializer_class = HabitActionSerializer
     permission_classes = [IsAuthenticated, IsHabitActionOwner]
-
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     if user.is_superuser:
-    #         return HabitAction.objects.all()
-    #     return HabitAction.objects.filter(
-    #         fulfillment__habit__user = user
-    #     ).prefetch_related(
-    #         Prefetch('fulfillment', queryset=HabitFulfillment.objects.filter(
-    #             habit__user=user
-    #         ).prefetch_related(
-    #             Prefetch('habit', queryset=Habit.objects.filter(user=user)
-    #             )))
-    #     )
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     obj = HabitAction.objects.get(pk=kwargs['pk'])
-    #     self.check_object_permissions(request, obj)
-    #     return Response(HabitActionSerializer(obj).data)
-
-    # def create(self, request, *args, **kwargs):
-    #     pk = request.data['fulfillment']
-    #     fulfil = HabitFulfillment.objects.get(pk=pk)
-    #     self.check_object_permissions(request, fulfil)
-    #     return super().create(request, *args, **kwargs)
-
-    # def update(self, request, *args, **kwargs):
-    #     pk = request.data['fulfillment']
-    #     fulfil = HabitFulfillment.objects.get(pk=pk)
-    #     self.check_object_permissions(request, fulfil)
-    #     return super().update(request, *args, **kwargs)
