@@ -25,7 +25,7 @@ class FulfillmentLevels(ListAPIView):
 
 class Habits(ModelViewSet):
     # serializer_class = HabitSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsHabitCreator]
 
     def get_serializer_class(self):
         user = self.request.user

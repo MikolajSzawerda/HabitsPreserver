@@ -1,11 +1,9 @@
-from os import stat
 from django.urls import reverse
 from habits_managerAPI.models import HabitFulfillment, Habit
 from habits_managerAPI.serializers import HabitSerializer, FulfillmentSerializer
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth.models import User
-from rest_framework.renderers import JSONRenderer
 import pytest
 
 '''
@@ -150,15 +148,16 @@ class HabitTestsLogged(BaseTestUnit):
     @pytest.mark.django_db
     def test_creating_habit(self):
         url = reverse('habits')
+        habits_num = len(Habit.objects.all())
         response, habit = self.crud.create(url)
         assert response.status_code == status.HTTP_201_CREATED
-        habits_num = len(Habit.objects.all())
         assert len(Habit.objects.all()) == habits_num + 1
         assert len(response.data['fulfillments']) == len(habit['fulfillments'])
 
     @pytest.mark.django_db
     def test_updating_habit(self):
         url = reverse('habit', kwargs={'pk':1})
+        fulfillments_num = len(HabitFulfillment.objects.all())
         habit = Habit.objects.get(pk=1)
         habit_serialized = HabitSerializer(habit).data
         habit_serialized['name']='Test test'
@@ -166,45 +165,46 @@ class HabitTestsLogged(BaseTestUnit):
         assert response.status_code == status.HTTP_200_OK
         habit = Habit.objects.get(pk=1)
         assert habit.name == 'Test test'
+        assert fulfillments_num == len(HabitFulfillment.objects.all())
 
     @pytest.mark.django_db
     def test_updating_habit_fulfillemnt(self):
         url = reverse('habit', kwargs={'pk':1})
         habit = Habit.objects.get(pk=1)
         habit_serialized = HabitSerializer(habit).data
-        habit_serialized['fulfillemnts'][0]['name']='test34'
-        habit_serialized['fulfillemnts'].pop(1)
+        habit_serialized['fulfillments'][0]['name']='test34'
+        habit_serialized['fulfillments'].pop(1)
         response = self.client.put(url, habit_serialized, format="json")
         assert response.status_code == status.HTTP_200_OK
         habit = Habit.objects.get(pk=1)
-        assert len(habit.fulfillemnts.all()) == 2
-        assert habit.fulfillemnts.get(name='test34') is not None
+        assert len(habit.fulfillments.all()) == 2
+        assert habit.fulfillments.get(name='test34') is not None
 
     @pytest.mark.django_db
     def test_updating_habit__by_adding_fulfillemnt(self):
         url = reverse('habit', kwargs={'pk':1})
         habit = Habit.objects.get(pk=1)
         habit_serialized = HabitSerializer(habit).data
-        fulfil = habit_serialized['fulfillemnts'].pop(1)
+        fulfil = habit_serialized['fulfillments'].pop(1)
         fulfil.pop('id')
         fulfil['name'] = '2 rodziały'
-        habit_serialized['fulfillemnts'].append(fulfil)
+        habit_serialized['fulfillments'].append(fulfil)
         response = self.client.put(url, habit_serialized, format="json")
         assert response.status_code == status.HTTP_200_OK
         habit = Habit.objects.get(pk=1)
-        assert len(habit.fulfillemnts.all()) == 3
+        assert len(habit.fulfillments.all()) == 3
 
     @pytest.mark.django_db
     def test_updating_habit_fulfillemnt_id_preserve(self):
         url = reverse('habit', kwargs={'pk':1})
         habit = Habit.objects.get(pk=1)
-        fulfillment_id = habit.fulfillemnts.first()
+        fulfillment_id = habit.fulfillments.first()
         habit_serialized = HabitSerializer(habit).data
-        habit_serialized['fulfillemnts'].pop(1)
+        habit_serialized['fulfillments'].pop(1)
         response = self.client.put(url, habit_serialized, format="json")
         assert response.status_code == status.HTTP_200_OK
         habit = Habit.objects.get(pk=1)
-        updated_fulfillment_id = habit.fulfillemnts.first()
+        updated_fulfillment_id = habit.fulfillments.first()
         assert fulfillment_id == updated_fulfillment_id
 
 
