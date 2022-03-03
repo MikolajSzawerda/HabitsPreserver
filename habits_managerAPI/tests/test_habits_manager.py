@@ -303,13 +303,13 @@ class HabitTestsAdmin(BaseTestUnit):
         url = reverse('habit', kwargs={'pk':1})
         habit = Habit.objects.get(pk=1)
         habit_serialized = HabitSerializer(habit).data
-        habit_serialized['fulfillemnts'][0]['name']='test34'
-        habit_serialized['fulfillemnts'].pop(1)
+        habit_serialized['fulfillments'][0]['name']='test34'
+        habit_serialized['fulfillments'].pop(1)
         response = self.client.put(url, habit_serialized, format="json")
         assert response.status_code == status.HTTP_200_OK
         habit = Habit.objects.get(pk=1)
-        assert len(habit.fulfillemnts.all()) == 2
-        assert habit.fulfillemnts.get(name='test34') is not None
+        assert len(habit.fulfillments.all()) == 2
+        assert habit.fulfillments.get(name='test34') is not None
 
     @pytest.mark.django_db
     def test_deleting_habit(self):

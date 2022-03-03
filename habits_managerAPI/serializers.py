@@ -1,5 +1,9 @@
-from rest_framework.serializers import ModelSerializer, IntegerField, ListSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import (ModelSerializer,
+                                        IntegerField,
+                                        ListSerializer,
+                                        PrimaryKeyRelatedField)
 from .models import FulfillmentLevel, Habit, HabitFulfillment, HabitAction
+
 
 class FulfillmentLevelSerializer(ModelSerializer):
     id = IntegerField(required=False)
@@ -21,9 +25,6 @@ class FulfillmentListSerializer(ListSerializer):
         ret = []
         for book_id, data in data_mapping.items():
             book = fulfillment_mapping.get(book_id, None)
-            id = data['fulfillment_level']['id']
-            level = FulfillmentLevel.objects.get(pk=id)
-            data['fulfillment_level']=level
             if book is None:
                 ret.append(self.child.create(data))
             else:
@@ -44,7 +45,6 @@ class FulfillmentSerializer(ModelSerializer):
         model = HabitFulfillment
         fields = ['id', 'name', 'description', 'fulfillment_level']
         list_serializer_class = FulfillmentListSerializer
-        # depth = 1
 
 
 class HabitSerializer(ModelSerializer):
@@ -67,6 +67,8 @@ class HabitSerializer(ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
         fulfillments = validated_data.get('fulfillments')
+        for ful in fulfillments:
+            ful['fulfillment_level'] = ful['fulfillment_level'].id
         updated_fulfillments = FulfillmentSerializer(instance.fulfillments, data=fulfillments, many=True)
         updated_fulfillments.is_valid()
         updated_fulfillments.save(habit=instance)
