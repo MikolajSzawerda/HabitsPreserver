@@ -1,6 +1,4 @@
-from functools import partial
-from numpy import require
-from rest_framework.serializers import ModelSerializer, IntegerField, ListSerializer
+from rest_framework.serializers import ModelSerializer, IntegerField, ListSerializer, PrimaryKeyRelatedField
 from .models import FulfillmentLevel, Habit, HabitFulfillment, HabitAction
 
 class FulfillmentLevelSerializer(ModelSerializer):
@@ -40,13 +38,13 @@ class FulfillmentListSerializer(ListSerializer):
 
 class FulfillmentSerializer(ModelSerializer):
     id = IntegerField(required=False)
-    fulfillment_level = FulfillmentLevelSerializer()
+    fulfillment_level = PrimaryKeyRelatedField(queryset=FulfillmentLevel.objects.all())
 
     class Meta:
         model = HabitFulfillment
         fields = ['id', 'name', 'description', 'fulfillment_level']
         list_serializer_class = FulfillmentListSerializer
-        depth = 1
+        # depth = 1
 
 
 class HabitSerializer(ModelSerializer):
