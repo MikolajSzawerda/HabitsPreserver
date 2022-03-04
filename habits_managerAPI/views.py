@@ -49,3 +49,15 @@ class Habits(ModelViewSet):
 class HabitActions(ModelViewSet):
     serializer_class = HabitActionSerializer
     permission_classes = [IsAuthenticated, IsHabitActionOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return HabitAction.objects.all()
+        return HabitAction.user_objects.created_by(user)
+
+    def get_object(self):
+        pk = self.kwargs['pk']
+        obj = HabitAction.objects.get(pk=pk)
+        self.check_object_permissions(self.request, obj)
+        return obj

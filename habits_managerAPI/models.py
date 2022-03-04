@@ -47,4 +47,5 @@ class HabitAction(models.Model):
     fulfillment = models.ForeignKey(HabitFulfillment, on_delete=models.CASCADE)
     date = models.DateField()
 
+    objects = models.Manager()
     user_objects = UserHabitActionManager()
