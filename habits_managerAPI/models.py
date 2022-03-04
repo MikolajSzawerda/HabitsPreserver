@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
-
+from django.db.models import Prefetch
 
 class ActivityItem(models.Model):
     name = models.CharField(max_length=200)
@@ -31,6 +31,20 @@ class HabitFulfillment(ActivityItem):
                                           on_delete=models.CASCADE)
 
 
+class UserHabitActionManager(models.Manager):
+    def created_by(self, user):
+        return super(UserHabitActionManager, self).get_queryset().filter(
+            fulfillment__habit__user = user
+        ).prefetch_related(
+            Prefetch('fulfillment', queryset=HabitFulfillment.objects.filter(
+                habit__user=user
+            ).prefetch_related(
+                Prefetch('habit', queryset=Habit.objects.filter(user=user)
+                )))
+        )
+
 class HabitAction(models.Model):
     fulfillment = models.ForeignKey(HabitFulfillment, on_delete=models.CASCADE)
     date = models.DateField()
+
+    user_objects = UserHabitActionManager()

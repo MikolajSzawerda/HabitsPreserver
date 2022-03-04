@@ -49,16 +49,8 @@ class HabitTestsLogged(APITestCase):
     @pytest.mark.django_db
     def test_retriving_actions(self):
         url = reverse('actions')
+        actions = HabitAction.user_objects.created_by(self.user)
         response = self.client.get(url)
-        actions = HabitAction.objects.filter(
-            fulfillment__habit__user = self.user
-        ).prefetch_related(
-            Prefetch('fulfillment', queryset=HabitFulfillment.objects.filter(
-                habit__user=self.user
-            ).prefetch_related(
-                Prefetch('habit', queryset=Habit.objects.filter(user=self.user)
-                )))
-        )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == len(actions)
 
